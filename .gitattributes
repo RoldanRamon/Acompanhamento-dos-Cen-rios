@@ -1,4 +1,5 @@
-* linguist-vendored
+static/* linguist-vendored
+
 *.r linguist-vendored=true
 *.md linguist-vendored=true
 *.html linguist-vendored=true
