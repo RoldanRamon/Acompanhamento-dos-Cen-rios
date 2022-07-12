@@ -1,0 +1,6 @@
+* linguist-vendored
+*.r linguist-vendored=true
+*.md linguist-vendored=true
+*.html linguist-vendored=true
+*.xlsx linguist-vendored=true
+*.csv linguist-vendored=true
