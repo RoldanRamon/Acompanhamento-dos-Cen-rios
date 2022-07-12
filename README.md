@@ -1,4 +1,4 @@
-![Marista Logo](https://s3-sa-east-1.amazonaws.com/prod-jobsite-files.kenoby.com/uploads/grupomarista-1626805223-microsoftteams-image-30png.png)
+![Marista Logo](https://e3ba6e8732e83984.cdn.gocache.net/uploads/image/file/900202/regular_c5977ec933c59bf4251ad1010b3b22df.jpg)
 
 # *Objetivo*
 
