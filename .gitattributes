@@ -1,7 +1,5 @@
-static/* linguist-vendored
+*.Rmd linguist-detectable=true
+*.R linguist-detectable=true
+*.md linguist-detectable=true
+*.html linguist-detectable=true
 
-*.r linguist-vendored=true
-*.md linguist-vendored=true
-*.html linguist-vendored=true
-*.xlsx linguist-vendored=true
-*.csv linguist-vendored=true
