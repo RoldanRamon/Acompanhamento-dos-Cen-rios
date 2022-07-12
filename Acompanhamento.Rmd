@@ -1,0 +1,224 @@
+---
+title: "12.Julho - Acompanhamento do Cenário 3"
+output:
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+rm(list = ls())
+library(dplyr)
+library(readxl)
+library(stringr)
+library(janitor)
+library(ggplot2)
+library(tidytext)
+library(lubridate)
+
+```
+
+```{r,warning=FALSE,message=FALSE,echo=FALSE}
+#carrega as bases
+#Março
+base_marco <- read_excel(path = '2- base/adri_Base_Pagamentos ATUAL 09_06 com informação adicional.xlsx',sheet = 'Março (F)') %>%
+  clean_names() %>% distinct(nova_oc) %>%
+  mutate(nova_oc =  str_trim(as.character(nova_oc)), mes_referencia = 'marco', caracteres = str_length(nova_oc),
+         tipo = if_else(caracteres > 8 | caracteres <6 | is.na(nova_oc),'verificar',
+                        if_else(caracteres == 8 & str_sub(string = nova_oc, end = 1)!=2 | caracteres == 6 & str_sub(string = nova_oc, end = 1)!=3,'verificar',
+                                if_else(caracteres == 8 & str_sub(string = nova_oc, end = 1)==2,'oc',
+                                        if_else(caracteres == 6 & str_sub(string = nova_oc, end = 1)==3,'solicitacao','verificar')))))
+
+
+#Abril
+base_abril <- read_excel(path = '2- base/adri_Base_Pagamentos ATUAL 09_06 com informação adicional.xlsx',sheet = 'Abril (F)') %>%
+  clean_names() %>% distinct(nova_oc) %>%
+  mutate(nova_oc =  str_trim(as.character(nova_oc)), mes_referencia = 'abril', caracteres = str_length(nova_oc),
+         tipo = if_else(caracteres > 8 | caracteres <6 | is.na(nova_oc),'verificar',
+                        if_else(caracteres == 8 & str_sub(string = nova_oc, end = 1)!=2 | caracteres == 6 & str_sub(string = nova_oc, end = 1)!=3,'verificar',
+                                if_else(caracteres == 8 & str_sub(string = nova_oc, end = 1)==2,'oc',
+                                        if_else(caracteres == 6 & str_sub(string = nova_oc, end = 1)==3,'solicitacao','verificar')))))
+  
+
+#Maio
+base_maio <- read_excel(path = '2- base/adri_Base_Pagamentos ATUAL 09_06 com informação adicional.xlsx',sheet = 'Maio (F)') %>%
+  clean_names() %>% distinct(nova_oc) %>%
+  mutate(nova_oc =  str_trim(as.character(nova_oc)), mes_referencia = 'maio', caracteres = str_length(nova_oc),
+         tipo = if_else(caracteres > 8 | caracteres <6 | is.na(nova_oc),'verificar',
+                        if_else(caracteres == 8 & str_sub(string = nova_oc, end = 1)!=2 | caracteres == 6 & str_sub(string = nova_oc, end = 1)!=3,'verificar',
+                                if_else(caracteres == 8 & str_sub(string = nova_oc, end = 1)==2,'oc',
+                                        if_else(caracteres == 6 & str_sub(string = nova_oc, end = 1)==3,'solicitacao','verificar')))))
+
+#Consolida as bases
+base_consolidada <- bind_rows(base_marco,base_abril,base_maio)
+rm(base_abril,base_marco,base_maio)
+
+
+base <- readxl::read_excel('2- base/solicitacoes_dentro_do_benner.xlsx') %>% clean_names() %>% mutate(num_sol_pai = as.character(num_sol_pai)) %>% 
+  left_join(base_consolidada %>% filter(tipo=='solicitacao'),by=c('num_sol_pai'='nova_oc'))
+
+```
+
+# Resumo Geral
+
+```{r,warning=FALSE,message=FALSE,echo=FALSE}
+graf_1 <-base_consolidada %>% count(tipo,sort = TRUE) %>% rename(total=n)
+
+ggplot(graf_1,aes(x = reorder(tipo,total),y = total))+
+  geom_col(fill='forestgreen')+
+  coord_flip()+
+  ylab('')+xlab('')+
+  geom_text(aes(label=format(total,big.mark='.')),size=4,hjust=+.7)+
+  theme_classic()+
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.line = element_blank())+
+  labs(title =  paste0("Total : ",format(sum(graf_1$total),big.mark = '.')))
+```
+
+
+# Resumo Geral Por Mês
+
+```{r,warning=FALSE,message=FALSE,echo=FALSE}
+graf_1 <-base_consolidada %>% count(tipo,mes_referencia,sort = TRUE) %>% rename(total=n) %>% mutate(mes_referencia=as.factor(mes_referencia) %>% forcats::fct_relevel('marco','abril','maio'))
+
+ggplot(graf_1,aes(x = reorder(tipo,total),y = total))+
+  geom_col(fill='forestgreen')+
+  coord_flip()+
+  facet_grid(~mes_referencia,scales = 'free')+
+  ylab('')+xlab('')+
+  geom_text(aes(label=format(total,big.mark='.')),size=4,hjust=+.7)+
+  theme_classic()+
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.line = element_blank())+
+labs(caption = paste0("Março: ",format(graf_1 %>% filter(mes_referencia=='marco') %>% summarise(total=sum(total)) %>% pull(total),big.mark = '.'),'\n',"Abril: ",format(graf_1 %>% filter(mes_referencia=='abril') %>% summarise(total=sum(total)) %>% pull(total),big.mark = '.'),'\n',"Maio: ",format(graf_1 %>% filter(mes_referencia=='maio') %>% summarise(total=sum(total)) %>% pull(total),big.mark = '.')))
+
+```
+
+
+## Quantidade de Solicitações por Status
+
+```{r,warning=FALSE,message=FALSE,echo=FALSE}
+
+resumo_total <- base %>% distinct(status_sol_pai,num_sol_pai) %>%
+  tabyl(status_sol_pai) %>% adorn_pct_formatting() %>% data.frame() %>% rename(total = n) %>% arrange(desc(total))
+
+ggplot(resumo_total,aes(x =reorder(status_sol_pai,total), y = total))+
+  geom_col(fill='forestgreen')+
+  coord_flip()+
+  ylab('')+xlab('')+
+  theme_classic()+
+  geom_text(aes(label=paste0(format(total,big.mark = '.',small.mark = ','),' - ',percent)),hjust=-.03,size=4)+
+  scale_y_continuous(limits = c(0,max(resumo_total$total)+700))+
+  labs(caption = paste0("Total de Solicitações: ",format(sum(resumo_total$total),big.mark = '.')))
+
+```
+
+## Análise por Mês de Referência
+
+```{r,warning=FALSE,message=FALSE,echo=FALSE}
+resumo_mes <- base %>% group_by(mes_referencia, status_sol_pai,num_sol_pai) %>%
+  summarise(total=1) %>% ungroup() %>% 
+  group_by(mes_referencia,status_sol_pai) %>% summarise(total=sum(total))
+
+ggplot(resumo_mes,aes(x =reorder(status_sol_pai,total), y = total,fill=mes_referencia))+
+  geom_col(alpha=.5,position = 'dodge')+
+  coord_flip()+
+  ylab('')+xlab('')+
+  theme_classic()+
+  geom_text(aes(color=mes_referencia,label=format(total,big.mark = '.',small.mark = ',')),hjust=0,size=4,position = position_dodge(width = 1))+
+  scale_y_continuous(limits = c(0,max(resumo_mes$total)+200))+
+  theme(legend.title = element_blank(),legend.position = 'top')+
+  labs(caption = paste0("Março: ",format(resumo_mes %>% filter(mes_referencia=='marco') %>% summarise(total=sum(total)) %>% pull(total),big.mark = '.'),'\n',"Abril: ",format(resumo_mes %>% filter(mes_referencia=='abril') %>% summarise(total=sum(total)) %>% pull(total),big.mark = '.'),'\n',"Maio: ",format(resumo_mes %>% filter(mes_referencia=='maio') %>% summarise(total=sum(total)) %>% pull(total),big.mark = '.')))
+```
+
+## Quantidade de OCs por Status
+
+```{r,warning=FALSE,message=FALSE,echo=FALSE}
+
+ocs <- readxl::read_excel('2- base/ocs_dentro_do_benner.xlsx') %>% clean_names() %>% 
+  distinct(ordem_compra,status)
+
+teste <- janitor::tabyl(ocs$status) %>% janitor::adorn_pct_formatting() %>%
+  data.frame() %>% arrange(desc(n))
+
+ggplot(teste,aes(x =reorder(ocs.status,n), y = n))+
+  geom_col(fill='forestgreen')+
+  coord_flip()+
+  ylab('')+xlab('')+
+  theme_classic()+
+  geom_text(aes(label=paste0(format(n,big.mark = '.',small.mark = ','),' - ',percent)),hjust=-.03,size=4)+
+  scale_y_continuous(limits = c(0,max(teste$n)*1.2))+
+  labs(caption = paste0("Total de OCs: ",format(sum(teste$n),big.mark = '.')))
+
+```
+
+## Top 10 aprovadores com maior quantidade de solicitações
+
+```{r,warning=FALSE,message=FALSE,echo=FALSE}
+filtro <- base %>% filter(status_sol_pai %in% c('CADASTRADA','CANCELADA','RECUSADA','ATENDIMENTO DIVERGENTE','EM ATENDIMENTO')) %>% 
+  distinct(data_inclusao_sol_pai,nome_empresa,nome_filial,status_sol_pai,modalidade,num_sol_pai,nome_do_solicitante,nome_do_aprovador,email_do_aprovador,motivo_status,centro_de_custo,projeto,texto_observacoes) %>% mutate(data_inclusao_sol_pai = lubridate::as_date(data_inclusao_sol_pai))
+                            
+graf <- filtro %>% group_by(nome_do_aprovador,status_sol_pai,num_sol_pai) %>% 
+  summarise(total = 1) %>% ungroup() %>% group_by(nome_do_aprovador,status_sol_pai) %>% summarise(total = sum(total)) %>% filter(!status_sol_pai %in% c('ATENDIMENTO DIVERGENTE','CANCELADA','EM ATENDIMENTO')) %>% mutate(nome_do_aprovador = as.factor(nome_do_aprovador))
+
+
+top_10 <- graf %>% tidyr::pivot_wider(names_from = status_sol_pai,values_from = total) %>% mutate(
+  CADASTRADA = if_else(is.na(CADASTRADA),0,CADASTRADA),
+  RECUSADA = if_else(is.na(RECUSADA),0,RECUSADA),
+  total = sum(CADASTRADA, RECUSADA)) %>% arrange(desc(total))
+
+top_10 <- head(top_10,10) %>% pull(nome_do_aprovador)
+
+graf %>% filter(nome_do_aprovador %in% top_10) %>% arrange(desc(total)) %>% 
+ggplot(aes(x = reorder(nome_do_aprovador,+total),y = total))+
+  facet_grid(~status_sol_pai,scales = 'free')+
+  geom_col(fill='forestgreen')+
+  coord_flip()+
+  geom_text(aes(label=total),size=4)+
+  ylab('')+xlab('')+
+  theme_classic()
+
+```
+
+### Solicitações: 'Cadastrada','Em Atendimento','Cancelada','Recusada','Atendimento Divergente'.
+
+```{r,warning=FALSE,message=FALSE,echo=FALSE}
+filtro <- base %>% filter(status_sol_pai %in% c('CADASTRADA','CANCELADA','RECUSADA','ATENDIMENTO DIVERGENTE','EM ATENDIMENTO')) %>% 
+group_by(data_inclusao_sol_pai,nome_empresa,nome_filial,status_sol_pai,modalidade,num_sol_pai,ordem_de_compra,nome_do_solicitante,nome_do_aprovador,email_do_aprovador,motivo_status,centro_de_custo,projeto,texto_observacoes,num_sol_filho,mes_referencia) %>%
+  summarise(total = quantidade_solicitada * valor_do_item) %>% ungroup() %>% 
+  group_by(data_inclusao_sol_pai,nome_empresa,nome_filial,status_sol_pai,modalidade,num_sol_pai,ordem_de_compra,nome_do_solicitante,nome_do_aprovador,email_do_aprovador,motivo_status,centro_de_custo,projeto,texto_observacoes,mes_referencia) %>%
+  summarise(valor_total = sum(total)) %>% mutate(data_inclusao_sol_pai = lubridate::as_date(data_inclusao_sol_pai)) %>% arrange(desc(valor_total))
+  
+
+DT::datatable(filtro,
+              extensions = 'Buttons', options = list(
+    dom = 'Bfrtip',
+    buttons = 
+      list('copy', 'print', list(
+        extend = 'collection',
+        buttons = c('csv', 'excel', 'pdf'),
+        text = 'Download')))) %>% 
+  DT::formatStyle(columns = c('data_inclusao_sol_pai','nome_empresa','nome_filial','status_sol_pai','modalidade','num_sol_pai','ordem_de_compra','nome_do_solicitante','nome_do_aprovador','email_do_aprovador','motivo_status','centro_de_custo','projeto','texto_observacoes','valor_total','mes_referencia'),`font-size` = '12px')
+
+```
+
+### Tabela das Ordens de Compra
+
+```{r,warning=FALSE,message=FALSE,echo=FALSE}
+
+ocs <- readxl::read_excel('2- base/ocs_dentro_do_benner.xlsx') %>% clean_names() %>% select(-c(telefone_do_fornecedor,email_do_fornecedor,data_inclusao))
+
+DT::datatable(ocs,
+              extensions = 'Buttons', options = list(
+    dom = 'Bfrtip',
+    buttons = 
+      list('copy', 'print', list(
+        extend = 'collection',
+        buttons = c('csv', 'excel', 'pdf'),
+        text = 'Download')))) %>% 
+  DT::formatStyle(columns = c("nome_empresa","nome_filial","ordem_compra","gasto","status","comprador","cnpj_fornecedor","nome_fornecedor"),`font-size` = '12px')
+
+
+```
+
