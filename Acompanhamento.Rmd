@@ -32,7 +32,6 @@ base_marco <- read_excel(path = '2- base/adri_Base_Pagamentos ATUAL 09_06 com in
                                 if_else(caracteres == 8 & str_sub(string = nova_oc, end = 1)==2,'oc',
                                         if_else(caracteres == 6 & str_sub(string = nova_oc, end = 1)==3,'solicitacao','verificar')))))
 
-
 #Abril
 base_abril <- read_excel(path = '2- base/adri_Base_Pagamentos ATUAL 09_06 com informação adicional.xlsx',sheet = 'Abril (F)') %>%
   clean_names() %>% distinct(nova_oc) %>%
@@ -42,7 +41,6 @@ base_abril <- read_excel(path = '2- base/adri_Base_Pagamentos ATUAL 09_06 com in
                                 if_else(caracteres == 8 & str_sub(string = nova_oc, end = 1)==2,'oc',
                                         if_else(caracteres == 6 & str_sub(string = nova_oc, end = 1)==3,'solicitacao','verificar')))))
   
-
 #Maio
 base_maio <- read_excel(path = '2- base/adri_Base_Pagamentos ATUAL 09_06 com informação adicional.xlsx',sheet = 'Maio (F)') %>%
   clean_names() %>% rename(nova_oc = coluna9) %>% distinct(nova_oc) %>%
@@ -64,7 +62,6 @@ base_outros <- read_excel(path = '2- base/adri_Base_Pagamentos ATUAL 09_06 com i
 #Consolida as bases
 base_consolidada <- bind_rows(base_marco,base_abril,base_maio,base_outros)
 rm(base_abril,base_marco,base_maio,base_outros)
-
 
 base <- readxl::read_excel('2- base/solicitacoes_dentro_do_benner.xlsx') %>% clean_names() %>% mutate(num_sol_pai = as.character(num_sol_pai)) %>% 
   left_join(base_consolidada %>% filter(tipo=='solicitacao'),by=c('num_sol_pai'='nova_oc'))
@@ -100,7 +97,7 @@ ggplot(graf_1,aes(x = reorder(tipo,total),y = total))+
   geom_text(aes(label=format(total,big.mark='.')),size=4,hjust=+.7)+
   theme_classic()+
   theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.line = element_blank())+
-labs(caption = paste0("Março: ",format(graf_1 %>% filter(mes_referencia=='marco') %>% summarise(total=sum(total)) %>% pull(total),big.mark = '.'),'\n',"Abril: ",format(graf_1 %>% filter(mes_referencia=='abril') %>% summarise(total=sum(total)) %>% pull(total),big.mark = '.'),'\n',"Maio: ",format(graf_1 %>% filter(mes_referencia=='maio') %>% summarise(total=sum(total)) %>% pull(total),big.mark = '.')))
+labs(caption = paste0("Março: ",format(graf_1 %>% filter(mes_referencia=='marco') %>% summarise(total=sum(total)) %>% pull(total),big.mark = '.'),'\n',"Abril: ",format(graf_1 %>% filter(mes_referencia=='abril') %>% summarise(total=sum(total)) %>% pull(total),big.mark = '.'),'\n',"Maio: ",format(graf_1 %>% filter(mes_referencia=='maio') %>% summarise(total=sum(total)) %>% pull(total),big.mark = '.'),'\n',"Outros: ",format(graf_1 %>% filter(mes_referencia=='Outros') %>% summarise(total=sum(total)) %>% pull(total),big.mark = '.')))
 
 ```
 
@@ -138,7 +135,7 @@ ggplot(resumo_mes,aes(x =reorder(status_sol_pai,total), y = total,fill=mes_refer
   geom_text(aes(color=mes_referencia,label=format(total,big.mark = '.',small.mark = ',')),hjust=0,size=4,position = position_dodge(width = 1))+
   scale_y_continuous(limits = c(0,max(resumo_mes$total)+200))+
   theme(legend.title = element_blank(),legend.position = 'top')+
-  labs(caption = paste0("Março: ",format(resumo_mes %>% filter(mes_referencia=='marco') %>% summarise(total=sum(total)) %>% pull(total),big.mark = '.'),'\n',"Abril: ",format(resumo_mes %>% filter(mes_referencia=='abril') %>% summarise(total=sum(total)) %>% pull(total),big.mark = '.'),'\n',"Maio: ",format(resumo_mes %>% filter(mes_referencia=='maio') %>% summarise(total=sum(total)) %>% pull(total),big.mark = '.')))
+  labs(caption = paste0("Março: ",format(resumo_mes %>% filter(mes_referencia=='marco') %>% summarise(total=sum(total)) %>% pull(total),big.mark = '.'),'\n',"Abril: ",format(resumo_mes %>% filter(mes_referencia=='abril') %>% summarise(total=sum(total)) %>% pull(total),big.mark = '.'),'\n',"Maio: ",format(resumo_mes %>% filter(mes_referencia=='maio') %>% summarise(total=sum(total)) %>% pull(total),big.mark = '.'),'\n',"Outros: ",format(resumo_mes %>% filter(mes_referencia=='Outros') %>% summarise(total=sum(total)) %>% pull(total),big.mark = '.')))
 ```
 
 ## Quantidade de OCs por Status
@@ -230,4 +227,3 @@ DT::datatable(ocs,
 
 
 ```
-
