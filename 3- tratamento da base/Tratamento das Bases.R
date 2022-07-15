@@ -27,7 +27,7 @@ base_abril <- read_excel(path = '2- base/adri_Base_Pagamentos ATUAL 09_06 com in
 
 #Maio
 base_maio <- read_excel(path = '2- base/adri_Base_Pagamentos ATUAL 09_06 com informação adicional.xlsx',sheet = 'Maio (F)') %>%
-  clean_names() %>% distinct(nova_oc) %>%
+  clean_names() %>% rename(nova_oc = coluna9) %>% distinct(nova_oc) %>%
   mutate(nova_oc =  str_trim(as.character(nova_oc)), mes_referencia = 'maio', caracteres = str_length(nova_oc),
          tipo = if_else(caracteres > 8 | caracteres <6 | is.na(nova_oc),'verificar',
                         if_else(caracteres == 8 & str_sub(string = nova_oc, end = 1)!=2 | caracteres == 6 & str_sub(string = nova_oc, end = 1)!=3,'verificar',

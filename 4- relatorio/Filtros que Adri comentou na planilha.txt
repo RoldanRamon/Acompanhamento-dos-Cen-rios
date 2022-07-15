@@ -1,0 +1,7 @@
+coluna 4 = cenário 3
+nf / processo != recibo 533, reembolso,
+
+coluna L = gerar nova oc
+coluna I = cenário 3
+data pgto = todo março e 15.abril (em março), e de abril 16.abril até 15.maio
+coluna x= tudo que não preenchido 
