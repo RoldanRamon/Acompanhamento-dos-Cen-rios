@@ -223,7 +223,7 @@ DT::datatable(ocs,
         extend = 'collection',
         buttons = c('csv', 'excel', 'pdf'),
         text = 'Download')))) %>% 
-  DT::formatStyle(columns = c("nome_empresa","nome_filial","ordem_compra","gasto","status","comprador","cnpj_fornecedor","nome_fornecedor"),`font-size` = '12px')
+  DT::formatStyle(columns = c("nome_empresa","nome_filial","ordem_compra","num_sol_pai","gasto","status","comprador","cnpj_fornecedor","nome_fornecedor"),`font-size` = '12px')
 
 
 ```
