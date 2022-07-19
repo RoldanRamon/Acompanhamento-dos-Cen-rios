@@ -1,0 +1,24 @@
+/* Formato Do Titulo*/ 
+h1 {
+    color: #fff;
+    text-align: center;
+    background-color: #159957;
+    background-image: linear-gradient(120deg,#155799,#159957);
+    padding: 1.5rem 2rem;
+}
+
+/* Formato Dos Cabeçalhos*/
+h2, h3 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-weight: 400;
+    color: #159957;
+}
+
+/* Formato Das Tabelas*/ 
+table.dataTable thead th, table.dataTable thead td  {
+    font-weight: 700;
+    background-color: #159957;
+    text-align: center;
+    color: #fff;
+}
