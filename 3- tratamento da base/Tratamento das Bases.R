@@ -44,11 +44,13 @@ base_outros <- read_excel(path = '2- base/adri_Base_Pagamentos ATUAL 09_06 com i
                                         if_else(caracteres == 6 & str_sub(string = nova_oc, end = 1)==3,'solicitacao','verificar')))))
 
 #Consolida as bases
-base_consolidada_sol <- bind_rows(base_marco,base_abril,base_maio,base_outros) %>% filter(tipo=='solicitacao')
-base_consolidada_oc <- bind_rows(base_marco,base_abril,base_maio,base_outros) %>% filter(tipo=='oc')
+todos <- bind_rows(base_marco,base_abril,base_maio,base_outros)
+base_consolidada_sol <- todos %>% filter(tipo=='solicitacao')
+base_consolidada_oc <- todos %>% filter(tipo=='oc')
 rm(base_maio,base_abril,base_marco,base_outros)
 
-
+#Exporta base consolidada
+writexl::write_xlsx(todos,'2- base/base_consolidada.xlsx')
 
 codigo <- c("SELECT DISTINCT A.DATAINCLUSAO AS DATA_INCLUSAO,
 H.NOME AS NOME_EMPRESA,
