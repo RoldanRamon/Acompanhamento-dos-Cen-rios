@@ -6,7 +6,7 @@ library(readxl)
 library(stringr)
 
 #Março
-base_marco <- read_excel(path = '2- base/adri_Base_Pagamentos ATUAL 09_06 com informação adicional.xlsx',sheet = 'Março (F)') %>%
+base_marco <- read_excel(path = '2- base/adri_Base_Pagamentos ATUAL 09_06 com informação adicional.xlsx',sheet = 'MARÇO (F)') %>%
   clean_names() %>% distinct(nova_oc) %>%
   mutate(nova_oc =  str_trim(as.character(nova_oc)), mes_referencia = 'marco', caracteres = str_length(nova_oc),
          tipo = if_else(caracteres > 8 | caracteres <6 | is.na(nova_oc),'verificar',
@@ -16,7 +16,7 @@ base_marco <- read_excel(path = '2- base/adri_Base_Pagamentos ATUAL 09_06 com in
 
 
 #Abril
-base_abril <- read_excel(path = '2- base/adri_Base_Pagamentos ATUAL 09_06 com informação adicional.xlsx',sheet = 'Abril (F)') %>%
+base_abril <- read_excel(path = '2- base/adri_Base_Pagamentos ATUAL 09_06 com informação adicional.xlsx',sheet = 'ABRIL (F)') %>%
   clean_names() %>% distinct(nova_oc) %>%
   mutate(nova_oc =  str_trim(as.character(nova_oc)), mes_referencia = 'abril', caracteres = str_length(nova_oc),
          tipo = if_else(caracteres > 8 | caracteres <6 | is.na(nova_oc),'verificar',
@@ -26,7 +26,7 @@ base_abril <- read_excel(path = '2- base/adri_Base_Pagamentos ATUAL 09_06 com in
 
 
 #Maio
-base_maio <- read_excel(path = '2- base/adri_Base_Pagamentos ATUAL 09_06 com informação adicional.xlsx',sheet = 'Maio (F)') %>%
+base_maio <- read_excel(path = '2- base/adri_Base_Pagamentos ATUAL 09_06 com informação adicional.xlsx',sheet = 'MAIO (F)') %>%
   clean_names() %>% distinct(nova_oc) %>%
   mutate(nova_oc =  str_trim(as.character(nova_oc)), mes_referencia = 'maio', caracteres = str_length(nova_oc),
          tipo = if_else(caracteres > 8 | caracteres <6 | is.na(nova_oc),'verificar',
@@ -35,7 +35,7 @@ base_maio <- read_excel(path = '2- base/adri_Base_Pagamentos ATUAL 09_06 com inf
                                         if_else(caracteres == 6 & str_sub(string = nova_oc, end = 1)==3,'solicitacao','verificar')))))
 
 #Outros
-base_outros <- read_excel(path = '2- base/adri_Base_Pagamentos ATUAL 09_06 com informação adicional.xlsx',sheet = 'Outros (F)') %>%
+base_outros <- read_excel(path = '2- base/adri_Base_Pagamentos ATUAL 09_06 com informação adicional.xlsx',sheet = 'OUTROS (F)') %>%
   clean_names() %>% distinct(nova_oc) %>%
   mutate(nova_oc =  str_trim(as.character(nova_oc)), mes_referencia = 'Outros', caracteres = str_length(nova_oc),
          tipo = if_else(caracteres > 8 | caracteres <6 | is.na(nova_oc),'verificar',
