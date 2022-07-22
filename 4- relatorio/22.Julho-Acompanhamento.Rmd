@@ -110,9 +110,10 @@ graf <- filtro %>% group_by(nome_do_aprovador,status_sol_pai,num_sol_pai) %>%
 
 
 top_10 <- graf %>% tidyr::pivot_wider(names_from = status_sol_pai,values_from = total) %>% mutate(
-  CADASTRADA = if_else(is.na(CADASTRADA),0,CADASTRADA),
+  #CADASTRADA = if_else(is.na(CADASTRADA),0,CADASTRADA),
   RECUSADA = if_else(is.na(RECUSADA),0,RECUSADA),
-  total = sum(CADASTRADA, RECUSADA)) %>% arrange(desc(total))
+  total = sum(RECUSADA)) %>% arrange(desc(total))
+  #total = sum(CADASTRADA, RECUSADA)) %>% arrange(desc(total))
 
 top_10 <- head(top_10,10) %>% pull(nome_do_aprovador)
 
