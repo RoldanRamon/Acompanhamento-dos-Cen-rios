@@ -8,6 +8,14 @@ editor_options:
   chunk_output_type: console
 ---
 
+```{r}
+
+#Este codigo deve ser colado em um arquivo separado para renderizar em outro diretorio
+rmarkdown::render('my.Rmd', output_file = 'folder/my.html')
+```
+
+
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 rm(list = ls())
