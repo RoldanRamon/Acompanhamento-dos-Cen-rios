@@ -176,7 +176,7 @@ ggplot(teste,aes(x =reorder(ocs.status,n), y = n))+
 
 ```{r,warning=FALSE,message=FALSE,echo=FALSE}
 
-ocs <- readxl::read_excel('../2- base/ocs_dentro_do_benner.xlsx') %>% clean_names() %>% select(-c(telefone_do_fornecedor,email_do_fornecedor,data_inclusao))
+ocs <- readxl::read_excel('../2- base/ocs_dentro_do_benner.xlsx') %>% clean_names() %>% select(-c(telefone_do_fornecedor,email_do_fornecedor,data_inclusao)) %>% distinct()
 
 DT::datatable(ocs,
               extensions = 'Buttons', options = list(
@@ -226,4 +226,65 @@ DT::datatable(duplicados,caption = 'Mesmo processo repetido em meses distintos',
         buttons = c('csv', 'excel', 'pdf'),
         text = 'Download')))) %>% 
   DT::formatStyle(columns = c("nova_oc","mes_referencia","tipo"),`font-size` = '12px')
+```
+
+### OCs: "Cancelado" e/ou "Recusada"
+
+```{r,warning=FALSE,message=FALSE,echo=FALSE}
+ocs <- readxl::read_excel('../2- base/ocs_dentro_do_benner.xlsx') %>% clean_names() %>% select(-c(telefone_do_fornecedor,email_do_fornecedor,data_inclusao)) %>% 
+  filter(status %in% c('CANCELADA','RECUSADA')) %>% distinct()
+
+DT::datatable(ocs,caption = 'Estes processos devem ser substituidos por outros, com status de cadastrada e/ou confirmada, porque ocs canceladas e/ou recusadas não permitem lançamento de NF',
+              extensions = 'Buttons', options = list(
+    dom = 'Bfrtip',
+    buttons = 
+      list('copy', 'print', list(
+        extend = 'collection',
+        buttons = c('csv', 'excel', 'pdf'),
+        text = 'Download')))) %>% 
+  DT::formatStyle(columns = c("nome_empresa","nome_filial","ordem_compra","num_sol_pai","gasto","status","comprador","cnpj_fornecedor","nome_fornecedor"),`font-size` = '12px')
+```
+
+### Solicitações: "Encerrada" e/ou "Em Atendimento"
+
+```{r,warning=FALSE,message=FALSE,echo=FALSE}
+filtro <- base %>% filter(status_sol_pai %in% c('ENCERRADA','EM ATENDIMENTO')) %>% 
+group_by(data_inclusao_sol_pai,nome_empresa,nome_filial,status_sol_pai,modalidade,num_sol_pai,ordem_de_compra,nome_do_solicitante,centro_de_custo,projeto,texto_observacoes,mes_referencia) %>%
+  summarise(total = quantidade_solicitada * valor_do_item) %>% ungroup() %>% 
+  group_by(data_inclusao_sol_pai,nome_empresa,nome_filial,status_sol_pai,modalidade,num_sol_pai,ordem_de_compra,nome_do_solicitante,centro_de_custo,projeto,texto_observacoes,mes_referencia) %>%
+  summarise(valor_total = sum(total)) %>% mutate(data_inclusao_sol_pai = lubridate::as_date(data_inclusao_sol_pai)) %>% arrange(desc(valor_total))
+  
+
+DT::datatable(filtro, caption = "Estas solicitações devem ser substituidas pelo número da OC dentro da planilha.",
+              extensions = 'Buttons', options = list(
+    dom = 'Bfrtip',
+    buttons = 
+      list('copy', 'print', list(
+        extend = 'collection',
+        buttons = c('csv', 'excel', 'pdf'),
+        text = 'Download')))) %>% 
+  DT::formatStyle(columns = c('data_inclusao_sol_pai','nome_empresa','nome_filial','status_sol_pai','modalidade','num_sol_pai','ordem_de_compra','nome_do_solicitante','centro_de_custo','projeto','texto_observacoes','valor_total','mes_referencia'),`font-size` = '12px')
+
+```
+
+### Solicitações: "Recusada" e/ou "Atendimento Divergente"
+
+```{r,warning=FALSE,message=FALSE,echo=FALSE}
+filtro <- base %>% filter(status_sol_pai %in% c('RECUSADA','ATENDIMENTO DIVERGENTE')) %>% 
+group_by(data_inclusao_sol_pai,nome_empresa,nome_filial,status_sol_pai,modalidade,num_sol_pai,ordem_de_compra,nome_do_solicitante,centro_de_custo,projeto,texto_observacoes,mes_referencia) %>%
+  summarise(total = quantidade_solicitada * valor_do_item) %>% ungroup() %>% 
+  group_by(data_inclusao_sol_pai,nome_empresa,nome_filial,status_sol_pai,modalidade,num_sol_pai,ordem_de_compra,nome_do_solicitante,centro_de_custo,projeto,texto_observacoes,mes_referencia) %>%
+  summarise(valor_total = sum(total)) %>% mutate(data_inclusao_sol_pai = lubridate::as_date(data_inclusao_sol_pai)) %>% arrange(desc(valor_total))
+  
+
+DT::datatable(filtro, caption = "Estas solicitações devem ser corrigidas e reenviadas para aprovação.",
+              extensions = 'Buttons', options = list(
+    dom = 'Bfrtip',
+    buttons = 
+      list('copy', 'print', list(
+        extend = 'collection',
+        buttons = c('csv', 'excel', 'pdf'),
+        text = 'Download')))) %>% 
+  DT::formatStyle(columns = c('data_inclusao_sol_pai','nome_empresa','nome_filial','status_sol_pai','modalidade','num_sol_pai','ordem_de_compra','nome_do_solicitante','centro_de_custo','projeto','texto_observacoes','valor_total','mes_referencia'),`font-size` = '12px')
+
 ```
