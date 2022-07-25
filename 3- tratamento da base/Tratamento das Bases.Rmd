@@ -200,4 +200,6 @@ writeLines(text = paste0(codigo, lista,")"),'../1- select/solicitacoes_de_compra
 # Usa python para copiar informações e deixar na área de transferencia
 pc <- import('pyperclip3')
 pc$copy(paste0(codigo, lista,")"))
+
+rm(list = ls())
 ```
