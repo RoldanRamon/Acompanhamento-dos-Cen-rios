@@ -3,7 +3,7 @@ title: "Tratamento das Bases"
 output: html_document
 ---
 
-# Carrega Bases
+## \# OCs
 
 ```{r, warning=FALSE,message=FALSE,echo=FALSE}
 rm(list = ls())
@@ -13,11 +13,7 @@ library(ggplot2)
 library(readxl)
 library(stringr)
 library(reticulate)
-```
 
-## \# Tratamento das OCs
-
-```{r, warning=FALSE,message=FALSE,echo=FALSE}
 #Março
 base_marco <- read_excel(path = '../2- base/adri_Base_Pagamentos ATUAL 09_06 com informação adicional.xlsx',sheet = 'MARÇO (F)') %>%
   clean_names() %>% distinct(nova_oc) %>%
@@ -117,7 +113,7 @@ pc$copy(paste0(codigo, lista,")"))
 
 ```
 
-## \# Tratamento das Solicitações
+## \# Solicitações
 
 ```{r, warning=FALSE,message=FALSE,echo=FALSE}
 codigo <- c("SELECT DISTINCT A.DATAINCLUSAO AS DATA_INCLUSAO_SOL_PAI,
